@@ -48,12 +48,21 @@ def clear_sessions(user=None, keep_current=False, device=None, force=False):
 		delete_session(sid, reason=reason)
 
 
+<<<<<<< HEAD
 def get_sessions_to_clear(user=None, keep_current=False, device=None):
 	"""Returns sessions of the current user. Called at login / logout
 
 	:param user: user name (default: current user)
 	:param keep_current: keep current session (default: false)
 	:param device: delete sessions of this device (default: desktop, mobile)
+=======
+def get_sessions_to_clear(user=None, keep_current=False, force=False):
+	"""Return sessions of the current user. Called at login / logout.
+
+	:param user: user name (default: current user)
+	:param keep_current: keep current session (default: false)
+	:param force: ignore simultaneous sessions count, log the user out of all except current (default: false)
+>>>>>>> 5570aa71be (fix(sessions): logout properly when user requests logout on password change)
 	"""
 	if not user:
 		user = frappe.session.user
@@ -65,14 +74,15 @@ def get_sessions_to_clear(user=None, keep_current=False, device=None):
 		device = (device,)
 
 	offset = 0
-	if user == frappe.session.user:
+	if not force and user == frappe.session.user:
 		simultaneous_sessions = frappe.db.get_value("User", user, "simultaneous_sessions") or 1
 		offset = simultaneous_sessions
 
 	session = frappe.qb.DocType("Sessions")
 	session_id = frappe.qb.from_(session).where((session.user == user) & (session.device.isin(device)))
 	if keep_current:
-		offset = max(0, offset - 1)
+		if not force:
+			offset = max(0, offset - 1)
 		session_id = session_id.where(session.sid != frappe.session.sid)
 
 	query = (
@@ -86,7 +96,7 @@ def delete_session(sid=None, user=None, reason="Session Expired"):
 	from frappe.core.doctype.activity_log.feed import logout_feed
 
 	if frappe.flags.read_only:
-		# This isn't manually initated logout, most likely user's cookies were expired in such case
+		# This isn't manually initiated logout, most likely user's cookies were expired in such case
 		# we should just ignore it till database is back up again.
 		return
 
