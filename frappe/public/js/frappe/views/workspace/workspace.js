@@ -164,7 +164,7 @@ frappe.views.Workspace = class Workspace {
 									: `<span class="indicator ${item.indicator_color}"></span>`
 							}
 						</span>
-						<span class="sidebar-item-label">${__(item.title)}<span>
+						<span class="sidebar-item-label">${__(item.label)}<span>
 					</a>
 					<div class="sidebar-item-control"></div>
 				</div>
@@ -641,6 +641,13 @@ frappe.views.Workspace = class Workspace {
 			title: __("Update Details"),
 			fields: [
 				{
+					label: __("Label"),
+					fieldtype: "Data",
+					fieldname: "label",
+					reqd: 1,
+					default: item.title,
+				},
+				{
 					label: __("Title"),
 					fieldtype: "Data",
 					fieldname: "title",
@@ -706,6 +713,7 @@ frappe.views.Workspace = class Workspace {
 					args: {
 						name: old_item.name,
 						title: values.title,
+						label: values.label,
 						icon: values.icon || "",
 						indicator_color: values.indicator_color || "",
 						parent: values.parent || "",
@@ -1217,6 +1225,12 @@ frappe.views.Workspace = class Workspace {
 			title: __("New Workspace"),
 			fields: [
 				{
+					label: __("Label"),
+					fieldtype: "Data",
+					fieldname: "label",
+					reqd: 1,
+				},
+				{
 					label: __("Title"),
 					fieldtype: "Data",
 					fieldname: "title",
@@ -1278,7 +1292,7 @@ frappe.views.Workspace = class Workspace {
 				let new_page = {
 					content: JSON.stringify(blocks),
 					name: name,
-					label: name,
+					label: values.label,
 					title: values.title,
 					public: values.is_public || 0,
 					for_user: values.is_public ? "" : frappe.session.user,
